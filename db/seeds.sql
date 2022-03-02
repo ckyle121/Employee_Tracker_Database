@@ -20,17 +20,17 @@ VALUES
 
 INSERT INTO employees (first_name, last_name, role_id, manager_id)
 VALUES
-    ('Will', 'Nollert', 1, 3),
-    ('Caroline', 'Kyle', 5, 1),
+    ('Will', 'Nollert', 1, 2),
+    ('Caroline', 'Kyle', 5, null),
     ('Reid', 'Schroder', 2 , 1),
-    ('Sean', 'New', 5, null),
-    ('Fay', 'Chong', 2, 1),
+    ('Sean', 'New', 1, 2),
+    ('Fay', 'Chong', 2, 4),
     ('Kimmi', 'Breece', 4, null),
     ('Jamie', 'Cross', 7, 2),
     ('Andrew', 'Farmer', 8, null),
-    ('Jessica', 'Smith', 3, 1),
+    ('Jessica', 'Smith', 3, 3),
     ('Brittany', 'Plange', 6, null),
-    ('Rachel', 'Hurtado', 3, 1),
+    ('Rachel', 'Hurtado', 3, 5),
     ('Natalie', 'Jones', 4, null);
 
 SELECT * FROM department;
