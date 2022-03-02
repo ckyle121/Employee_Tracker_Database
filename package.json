@@ -1,0 +1,25 @@
+{
+  "name": "employee_tracker_database",
+  "version": "1.0.0",
+  "description": "",
+  "main": "passwords.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckyle121/Employee_Tracker_Database.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ckyle121/Employee_Tracker_Database/issues"
+  },
+  "homepage": "https://github.com/ckyle121/Employee_Tracker_Database#readme",
+  "dependencies": {
+    "inquirer": "^8.2.0",
+    "mysql2": "^2.3.3"
+  }
+}
