@@ -1,15 +1,14 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
-const cTable = require('console.table');
 
 // start server after db connection 
 db.connect(err => {
     if (err) throw err;
 
-    promtUser();
+    promptUser();
 });
 
-function promtUser() {
+function promptUser() {
     inquirer.prompt([
         {
             type: 'list',
@@ -93,44 +92,45 @@ function promtUser() {
 // view all employees in the database
 function viewEmployees(){
     sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, 
-    department.department_name AS 'department', roles.salary FROM employees, roles, deparment
-    WHERE department.id = roles.id AND roles.id = employees.role_id ORDER BY employees.id ASC`;
+    departments.department_name AS 'department', roles.salary FROM employees, roles, departments
+    WHERE departments.id = roles.id AND roles.id = employees.role_id ORDER BY employees.id ASC`;
 
     db.query(sql, function(err, res){
         if (err) throw err;
 
-        console.log('Employees:')
-        cTable(res)
-        promtUser();
-    })
+        console.log('Employees:');
+        console.table(res);
+        promptUser();
+    });
 };
 
 // view all employees by department in the database
 function viewEmployeesByDepartment(){
     sql = `SELECT employees.first_name, employees.last_name, departments.department_name AS department 
-            FROM employees LEFT JOIN role ON employees.role_id = roles.id LEFT JOIN department ON roles.department_id = departments.id`;
+            FROM employees LEFT JOIN roles ON employees.role_id = roles.id LEFT JOIN departments 
+            ON roles.department_id = departments.id ORDER BY department`;
 
     db.query(sql, function(err, res){
         if (err) throw err;
 
-        console.log('Employees by Department:')
-        cTable(res)
-        promtUser();
-    })
+        console.log('Employees by Department:');
+        console.table(res);
+        promptUser();
+    });
 };
 
 // view all roles in the database
 function viewRoles(){
     sql = `SELECT roles.id, roles.title, departments.department_name AS department FROM roles
-            INNER JOIN department ON roles.department_id = departments.id`;
+            INNER JOIN departments ON roles.department_id = departments.id`;
 
     db.query(sql, function(err, res){
         if (err) throw err;
 
         console.log('Roles:');
-        cTable(res);
-        promtUser();
-    })
+        console.table(res);
+        promptUser();
+    });
 };
 
 // view all departments in the database
@@ -141,22 +141,23 @@ function viewDepartments(){
         if (err) throw err;
 
         console.log('Departments: ')
-        cTable(res);
-        promtUser();
-    })
+        console.table(res);
+        promptUser();
+    });
 };
 
 // view budget of deparment in the database
 function viewBudgetByDepartment(){
     const sql = `SELECT department_id AS id, departments.department_name AS department,
-                    SUM(salary) AS budget FROM roles INNER JOIN department ON roles.department_id = departments.id
+                    SUM(salary) AS budget FROM roles INNER JOIN departments ON roles.department_id = departments.id
                     GROUP BY roles.department_id`;
 
     db.query(sql, (err, res) => {
         if (err) throw err;
 
         console.log('Alloted Budget by Department:');
-        cTable(res);
+        console.table(res);
+        promptUser();
     });
 };
 
@@ -170,20 +171,19 @@ function addDepartment() {
             type: 'input',
             message: 'What is the name of the department?'
         }
-    ]).then(answer => {
-        db.query(`INSERT INTO departments SET ?`, answer.newDepartment, (err, res) => {
+    ]).then((answer) => {
+        db.query(`INSERT INTO departments (department_name) VALUES (?)`, answer.newDepartment, (err, res) => {
             if (err) throw err;
 
             console.log('Added ' + answer.addDepartment + 'to departments.');
             viewDepartments();
         });
     });
-    promtUser();
 };
 
 // add role to database 
 function addRole(){
-    inquirer.promt([
+    inquirer.prompt([
         {
             type: 'input',
             name: 'addRole',
@@ -221,5 +221,3 @@ function addRole(){
         })
     });
 };
-
-promptUser();
