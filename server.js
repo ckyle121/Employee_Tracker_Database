@@ -6,11 +6,10 @@ const cTable = require('console.table');
 db.connect(err => {
     if (err) throw err;
 
-    console.log('Database connected. Connect as id' + db.threadId);
     promtUser();
 });
 
-const promtUser = () => {
+function promtUser() {
     inquirer.prompt([
         {
             type: 'list',
