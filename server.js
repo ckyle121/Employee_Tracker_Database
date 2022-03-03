@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
+const cTable = require('console.table');
 
 // start server after db connection 
 db.connect(err => {
@@ -9,11 +10,12 @@ db.connect(err => {
     promtUser();
 });
 
-function promtUser() {
+const promtUser = () => {
     inquirer.prompt([
         {
             type: 'list',
             message: 'What would you like to do?',
+            name: 'choice',
             choices: [
                 'View All Employees',
                 'View All Employees by Department',
@@ -84,7 +86,7 @@ function promtUser() {
                 db.end();
                 break;
         }
-    })
+    });
 };
 
 /////// VEIW ////////////
@@ -99,7 +101,7 @@ function viewEmployees(){
         if (err) throw err;
 
         console.log('Employees:')
-        console.table(res)
+        cTable(res)
         promtUser();
     })
 };
@@ -113,7 +115,7 @@ function viewEmployeesByDepartment(){
         if (err) throw err;
 
         console.log('Employees by Department:')
-        console.table(res)
+        cTable(res)
         promtUser();
     })
 };
@@ -126,7 +128,8 @@ function viewRoles(){
     db.query(sql, function(err, res){
         if (err) throw err;
 
-        console.table('Roles:', res)
+        console.log('Roles:');
+        cTable(res);
         promtUser();
     })
 };
@@ -139,7 +142,7 @@ function viewDepartments(){
         if (err) throw err;
 
         console.log('Departments: ')
-        console.table(res)
+        cTable(res);
         promtUser();
     })
 };
@@ -154,7 +157,7 @@ function viewBudgetByDepartment(){
         if (err) throw err;
 
         console.log('Alloted Budget by Department:');
-        console.table(res);
+        cTable(res);
     });
 };
 
@@ -173,6 +176,7 @@ function addDepartment() {
             if (err) throw err;
 
             console.log('Added ' + answer.addDepartment + 'to departments.');
+            viewDepartments();
         });
     });
     promtUser();
@@ -218,3 +222,5 @@ function addRole(){
         })
     });
 };
+
+promptUser();
