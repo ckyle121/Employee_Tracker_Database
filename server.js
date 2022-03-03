@@ -299,13 +299,14 @@ function addEmployee(){
 //// UPDATE //////////
 // update an existing employee's role
 function updateEmployee(){
-    let sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.id AS 'role_id'
+    let sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.id AS "role_id"
                 FROM employees, roles, departments WHERE departments.id = roles.department_id AND roles.id = employees.role_id`;
-    db.query(sql, (err, res) => {
+        
+        db.query(sql, (err, res) => {
         if (err) throw err; 
 
-        let employeeNamesArray = [];
-        res.forEach((employee) => {employeeNamesArray.push(`${employee.first_name} ${employee.last_name}`)})
+        let employeeArray = [];
+        res.forEach((employee) => {employeeArray.push(`${employee.first_name} ${employee.last_name}`);});
 
         let sql = `SELECT roles.id, roles.title FROM roles`;
         db.query(sql, (err, res) => {
@@ -317,7 +318,7 @@ function updateEmployee(){
                     name: 'chosenEmployee',
                     type: 'list',
                     message: 'Which employee has a new role?',
-                    choices: employeeNamesArray
+                    choices: employeeArray
                   },
                   {
                     name: 'chosenRole',
@@ -335,10 +336,7 @@ function updateEmployee(){
                   });
       
                   res.forEach((employee) => {
-                    if (
-                      answer.chosenEmployee ===
-                      `${employee.first_name} ${employee.last_name}`
-                    ) {
+                    if (answer.chosenEmployee === `${employee.first_name} ${employee.last_name}`) {
                       employeeId = employee.id;
                     }
                   });
@@ -346,8 +344,8 @@ function updateEmployee(){
                   let sqls = `UPDATE employees SET employees.role_id = ? WHERE employees.id = ?`;
                   db.query(sqls, [newTitleId, employeeId], (err) => {
                         if (err) throw err;
-                        console.log('Employee Role Updated');
-                        promptUser();
+                        console.log('Employee Role Updated.');
+                        viewEmployees();
                   });
             });
         });
