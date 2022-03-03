@@ -219,8 +219,8 @@ function addRole(){
                 let departmentId;
 
                 res.forEach((department) => {
-                    if (departmentData.department_name === department.department_name){
-                        departmentId = departments.id
+                    if (departmentData.departmentName === department.department_name){
+                        departmentId = department.id
                     }
                 });
 
@@ -271,7 +271,7 @@ function addEmployee(){
 
                 const managerSql = `SELECT * FROM employees`
                 db.query(managerSql, (err, data) => {
-                    if (error) throw error;
+                    if (err) throw error;
                     const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
                     inquirer.prompt([
                         {
@@ -308,10 +308,10 @@ function updateEmployee(){
         let employeeNamesArray = [];
         res.forEach((employee) => {employeeNamesArray.push(`${employee.first_name} ${employee.last_name}`)})
 
-        let sql = `SELECT roles.id, roles.title FROM role`;
+        let sql = `SELECT roles.id, roles.title FROM roles`;
         db.query(sql, (err, res) => {
             let rolesArray = [];
-            response.forEach((role) => {rolesArray.push(role.title)})
+            res.forEach((role) => {rolesArray.push(role.title)})
 
             inquirer.prompt([
                 {
@@ -335,7 +335,7 @@ function updateEmployee(){
                     }
                   });
       
-                  response.forEach((employee) => {
+                  res.forEach((employee) => {
                     if (
                       answer.chosenEmployee ===
                       `${employee.first_name} ${employee.last_name}`
@@ -344,8 +344,13 @@ function updateEmployee(){
                     }
                   });
 
-                  let sql = ``
-            })
+                  let sqls = `UPDATE employees SET employees.role_id = ? WHERE employees.id = ?`;
+                  db.query(sqls, [newTitleId, employeeId], (err) => {
+                        if (err) throw err;
+                        console.log('Employee Role Updated');
+                        promptUser();
+                  });
+            });
         });
     });
 };
