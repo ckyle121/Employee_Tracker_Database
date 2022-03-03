@@ -183,41 +183,56 @@ function addDepartment() {
 
 // add role to database 
 function addRole(){
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'addRole',
-            message: 'What role would you like to add?',
-            validate: addRole => {
-                if (addRole){
-                    return true;
-                } else {
-                    console.log('Please enter a role');
-                    return false; 
-                }
+    const deptSql = `SELECT * FROM departments`;
+    db.query(deptSql, (err, res) => {
+        if (err) throw err;
+
+        let deptNames = [];
+
+        res.forEach((department) => {deptNames.push(department.department_name)});
+
+        inquirer.prompt([
+            {
+                name: 'departmentName',
+                type: 'list',
+                message: 'What department does this new role belong to?',
+                choices: deptNames
             }
-        },
-        {
-            type: 'input',
-            name: 'salary',
-            message: 'What is the salary of this role?',
-            validate: addSalary => {
-                if (isNaN(addSalary)){
-                    return true;
-                } else {
-                    console.log('Please enter a salary.');
-                    return false;
+        ]).then((answer) => {
+            addRoleContinue(answer);
+        });
+
+        const addRoleContinue = (departmentData) => {
+            inquirer.prompt([
+                {
+                    name: 'newRole',
+                    type: 'input',
+                    message: 'What is the title of the new role?'
+                },
+                {
+                    name: 'salary',
+                    type: 'input',
+                    message: 'How much salary does this new role earn?'
                 }
-            }
+            ]).then((answer) => {
+                let newRole = answer.newRole;
+                let departmentId;
+
+                res.forEach((department) => {
+                    if (departmentData.department_name === department.department_name){
+                        departmentId = departments.id
+                    }
+                });
+
+                let sql = `INSERT INTO roles (title, salary, department_id) VALUES (?,?,?)`;
+                let params = [newRole, answer.salary, departmentId];
+
+                db.query(sql, params, (err) => {
+                    if (err) throw err;
+
+                    viewRoles();
+                });
+            });
         }
-    ]).then(answers => {
-        const params = [answers.addRole, answers.salary];
-        const deptSql = `SELECT department_name, id FROM departments`;
-
-        db.query(deptSql, (err, data) => {
-            if (err) throw err;
-
-            const dept = data.map(({ department_name, id }) => ({ name: name, value: id }));
-        })
     });
 };
