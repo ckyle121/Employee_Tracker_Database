@@ -163,7 +163,7 @@ function viewBudgetByDepartment(){
 
 /////// ADD ////////////
 
-// add department to database
+// create/ add department to database
 function addDepartment() {
     inquirer.prompt([
         {
@@ -181,7 +181,7 @@ function addDepartment() {
     });
 };
 
-// add role to database 
+// create / add role to database 
 function addRole(){
     const deptSql = `SELECT * FROM departments`;
     db.query(deptSql, (err, res) => {
@@ -234,5 +234,118 @@ function addRole(){
                 });
             });
         }
+    });
+};
+
+// create / add new employee
+function addEmployee(){
+    inquirer.prompt([
+        {
+            name: 'firstName',
+            type: 'input',
+            message: 'What is the first name of this new employee?'
+        },
+        {
+            name: 'lastName',
+            type: 'input',
+            message: 'What is the last name of this new employee?'
+        }
+    ]).then(answer => {
+        const params = [answer.firstName, answer.lastName];
+
+        const roleSql = `SELECT roles.id, roles.title FROM roles`;
+        db.query(roleSql, (err, data) =>{
+            if (err) throw err; 
+
+            const roles = data.map(({ id, title }) => ({ name: title, value: id }));
+            inquirer.prompt([
+                {
+                    name: 'role',
+                    type: 'list',
+                    message: "What is the new employee's role?",
+                    choices: roles
+                }
+            ]).then(roleChoice => {
+                const role = roleChoice.role;
+                params.push(role);
+
+                const managerSql = `SELECT * FROM employees`
+                db.query(managerSql, (err, data) => {
+                    if (error) throw error;
+                    const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+                    inquirer.prompt([
+                        {
+                            name: 'manager',
+                            type: 'list',
+                            message: "Who will be this employee's manager?",
+                            choices: managers
+                        }
+                    ]).then(managerChocie => {
+                        const manager = managerChocie.manager;
+                        params.push(manager);
+
+                        const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                                        VALUES (?,?,?,?)`;
+                        db.query(sql, params, (err) => {
+                            if (err) throw err;
+                            viewEmployees();
+                        });
+                    });
+                });
+            });
+        });
+    });
+};
+
+//// UPDATE //////////
+// update an existing employee's role
+function updateEmployee(){
+    let sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.id AS 'role_id'
+                FROM employees, roles, departments WHERE departments.id = roles.department_id AND roles.id = employees.role_id`;
+    db.query(sql, (err, res) => {
+        if (err) throw err; 
+
+        let employeeNamesArray = [];
+        res.forEach((employee) => {employeeNamesArray.push(`${employee.first_name} ${employee.last_name}`)})
+
+        let sql = `SELECT roles.id, roles.title FROM role`;
+        db.query(sql, (err, res) => {
+            let rolesArray = [];
+            response.forEach((role) => {rolesArray.push(role.title)})
+
+            inquirer.prompt([
+                {
+                    name: 'chosenEmployee',
+                    type: 'list',
+                    message: 'Which employee has a new role?',
+                    choices: employeeNamesArray
+                  },
+                  {
+                    name: 'chosenRole',
+                    type: 'list',
+                    message: 'What is their new role?',
+                    choices: rolesArray
+                  }
+            ]).then((answer) => {
+                let newTitleId, employeeId;
+
+                res.forEach((role) => {
+                    if (answer.chosenRole === role.title) {
+                      newTitleId = role.id;
+                    }
+                  });
+      
+                  response.forEach((employee) => {
+                    if (
+                      answer.chosenEmployee ===
+                      `${employee.first_name} ${employee.last_name}`
+                    ) {
+                      employeeId = employee.id;
+                    }
+                  });
+
+                  let sql = ``
+            })
+        });
     });
 };
