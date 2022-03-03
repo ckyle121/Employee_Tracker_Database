@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ckyle121/Employee_Tracker_Database#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
     "inquirer": "^8.2.0",
     "mysql2": "^2.3.3"
   }
