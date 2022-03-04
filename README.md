@@ -22,3 +22,9 @@ A CLI application that at a minimum allows the user to:
 * JavaScript
 * Inquirer 
 
+## Examples: 
+
+![image](https://user-images.githubusercontent.com/75647359/156808108-e319098b-f96e-4d2c-8ccb-7d4973663871.png)
+
+![image](https://user-images.githubusercontent.com/75647359/156808236-201b3b8d-dd74-4355-8414-c56f835ff0e2.png)
+
