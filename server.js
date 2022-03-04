@@ -19,8 +19,9 @@ function promptUser() {
                 'View All Employees by Department',
                 'View All Departments',
                 'View All Roles',
-                'View All Departments by Budget',
-                'Update Employee',
+                'View All Department Budgets',
+                'Update Employee Role',
+                'Update Employee Manager',
                 'Add Employee',
                 'Add Role',
                 'Add Department',
@@ -48,12 +49,16 @@ function promptUser() {
                 viewRoles();
                 break;
 
-            case 'View All Departments by Budget':
+            case 'View All Department Budgets':
                 viewBudgetByDepartment();
                 break;
 
-            case 'Update Employee':
+            case 'Update Employee Role':
                 updateEmployee();
+                break;
+            
+            case 'Update Employee Manager':
+                updateEmployeeManager();
                 break;
 
             case 'Add Employee':
@@ -91,9 +96,11 @@ function promptUser() {
 
 // view all employees in the database
 function viewEmployees(){
-    sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department_name AS 'department', 
-            roles.salary FROM employees, roles, departments WHERE departments.id = roles.department_id AND roles.id = employees.role_id`;
-
+    sql = `SELECT E.id AS id, E.first_name AS 'first name', E.last_name AS 'last name', 
+    R.title AS role, D.department_name AS department, CONCAT(M.first_name, " ", M.last_name) AS manager
+    FROM employees AS E LEFT JOIN roles AS R ON E.role_id = R.id
+    LEFT JOIN departments AS D ON R.department_id = D.id
+    LEFT JOIN employees AS M ON E.manager_id = M.id`;
     db.query(sql, function(err, res){
         if (err) throw err;
 
@@ -302,11 +309,11 @@ function updateEmployee(){
     let sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.id AS "role_id"
                 FROM employees, roles, departments WHERE departments.id = roles.department_id AND roles.id = employees.role_id`;
         
-        db.query(sql, (err, res) => {
+        db.query(sql, (err, response) => {
         if (err) throw err; 
 
         let employeeArray = [];
-        res.forEach((employee) => {employeeArray.push(`${employee.first_name} ${employee.last_name}`);});
+        response.forEach((employee) => {employeeArray.push(`${employee.first_name} ${employee.last_name}`);});
 
         let sql = `SELECT roles.id, roles.title FROM roles`;
         db.query(sql, (err, res) => {
@@ -335,7 +342,7 @@ function updateEmployee(){
                     }
                   });
       
-                  res.forEach((employee) => {
+                  response.forEach((employee) => {
                     if (answer.chosenEmployee === `${employee.first_name} ${employee.last_name}`) {
                       employeeId = employee.id;
                     }
@@ -350,6 +357,57 @@ function updateEmployee(){
             });
         });
     });
+};
+
+function updateEmployeeManager() {
+    let sql = `SELECT employees.id, employees.first_name, employees.last_name, employees.manager_id
+                FROM employees`;
+    
+    db.query(sql, (err, res) => {
+        let employeeArray = [];
+        res.forEach((employee) => {employeeArray.push(`${employee.first_name} ${employee.last_name}`);});
+        
+        inquirer.prompt([
+            {
+                name: 'chosenEmployee',
+                type: 'list',
+                message: 'Which employee has a new manager?',
+                choices: employeeArray
+            },
+            {
+                name: 'newManager',
+                type: 'list',
+                message: 'Who is the manager?',
+                choices: employeeArray
+            }
+        ]).then((answer) => {
+            let employeeId, managerId;
+            res.forEach((employee) => {
+                if (answer.chosenEmployee === `${employee.first_name} ${employee.last_name}`){
+                    employeeId = employee.id;
+                }
+
+                if (answer.newManager === `${employee.first_name} ${employee.last_name}`){
+                    managerId = employee.id;
+                }
+            });
+
+            if (answer.chosenEmployee === answer.newManager){
+                console.log('Invalid Manager Selection');
+                promptUser();
+            } 
+            else {
+                let sql = `UPDATE employees SET employees.manager_id = ? WHERE employees.id = ?`;
+
+                db.query(sql, [managerId, employeeId], (err) => {
+                    if (err) throw err; 
+
+                    console.log('Updated Employee Manager');
+                    promptUser();
+                });
+            }
+        });
+    });     
 };
 
 ////////// DELETE////////////////
